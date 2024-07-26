@@ -4,12 +4,28 @@ from .models import Tag, RefTag
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 import requests
+from decimal import Decimal
 
 
 # Create your views here.
+def convert_decimal_to_float(data):
+    return [
+        tuple(float(item) if isinstance(item, Decimal) else item for item in row)
+        for row in data
+    ]
+
+
 def index(request):
     data = []
     context = {}
+    
+    # Clear session data when the page is refreshed
+    if request.method == "GET":
+        request.session.pop('data', None)
+        
+    # Load session data if exists
+    if "data" in request.session:
+        data = request.session["data"]
 
     if request.method == "POST":
         date = request.POST.get("date")
@@ -23,7 +39,9 @@ def index(request):
                 EXEC Store_PrintTag_AC %s, %s, %s
             """
             cursor.execute(query, [whouse, module_part, date])
-            data = cursor.fetchall()
+            new_data = cursor.fetchall()
+            new_data = convert_decimal_to_float(new_data)  # Convert Decimal to float
+            data.extend(new_data)  # Append new data to existing data
 
         context.update(
             {
@@ -31,9 +49,11 @@ def index(request):
                 "selected_whouse": whouse,
                 "part_no": part_no,
                 "selected_module_part": module_part,
-                "data": data,
             }
         )
+
+    # Save updated data to session
+    request.session["data"] = data
 
     with connections["formula_vcst"].cursor() as cursor:
         whouse_query = """
@@ -52,6 +72,7 @@ def index(request):
         {
             "whouse_data": whouse_data,
             "module_part_data": module_part_data,
+            "data": data,  # Pass data to template
         }
     )
 
@@ -62,7 +83,7 @@ def index(request):
 def save_selected(request):
     if request.method == "POST":
         selected_indices = request.POST.getlist("selected")
-        
+
         def print_tags(ref_tag, part_name):
             # URL สำหรับล็อกอิน
             login_url = "http://192.168.20.16:8080/jasperserver/rest_v2/login?j_username=jasperadmin&j_password=jasperadmin"
@@ -93,7 +114,7 @@ def save_selected(request):
                 return HttpResponse(
                     "Login to JasperServer failed", status=login_response.status_code
                 )
-        
+
         # ตรวจสอบปุ่มที่ถูกกด
         if "print_tag_qty" in request.POST:
             ref_tag = RefTag.objects.create()
@@ -126,7 +147,7 @@ def save_selected(request):
                     ref_tag=ref_tag,
                 )
             return print_tags(ref_tag, part_name)
-        
+
         if "print_tag_no_qty" in request.POST:
             ref_tag = RefTag.objects.create()
 
@@ -156,7 +177,7 @@ def save_selected(request):
                     ref_tag=ref_tag,
                 )
             return print_tags(ref_tag, part_name)
-        
+
         if "print_tag_blank" in request.POST:
             ref_tag = RefTag.objects.create()
 
@@ -165,5 +186,5 @@ def save_selected(request):
                     ref_tag=ref_tag,
                 )
             return print_tags(ref_tag, "")
-        
+
         return redirect("/")
