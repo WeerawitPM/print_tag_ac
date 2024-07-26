@@ -1,0 +1,13 @@
+{% load static %}
+<nav class="navbar bg-body-tertiary shadow-sm border">
+    <div class="container-fluid d-flex">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="{% static 'print_tag_ac_app/vcsthai.png' %}" alt="Logo" width="75" height="50" class="d-inline-block align-text-top me-2">
+        <span>VCS (Thailand)</span>
+      </a>
+      <div class="d-flex fs-5 fw-medium">
+        {% include 'components/dark-light-switch.html' %}
+        <span style="color: brown;" class="me-1">ITC </span> Center
+      </div>
+    </div>
+</nav>
