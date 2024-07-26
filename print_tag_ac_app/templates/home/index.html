@@ -56,7 +56,7 @@
         <table class="table table-borderless table-striped">
           <thead>
             <tr>
-              <th scope="col">#</th>
+              <th scope="col"><input type="checkbox" id="selectAll" class="form-check-input" /></th>
               <th scope="col">No.</th>
               <th scope="col">Part No.</th>
               <th scope="col">Part Code</th>
@@ -159,6 +159,12 @@
     
       $('#printTagBtn').on('click', validateSelection);
       $('#printTagNoBtn').on('click', validateSelection);
+
+      // Select/Deselect all checkboxes that are visible
+      $('#selectAll').on('click', function () {
+        var isChecked = $(this).is(':checked');
+        $('.data-row:visible input[name="selected"]').prop('checked', isChecked);
+      });
     })
   </script>
 {% endblock %}
