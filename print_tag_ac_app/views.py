@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from django.db import connections
 from .models import Tag, RefTag
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
+import requests
+
 
 # Create your views here.
 def index(request):
@@ -54,11 +57,43 @@ def index(request):
 
     return render(request, "home/index.html", context)
 
+
 @csrf_exempt
 def save_selected(request):
     if request.method == "POST":
         selected_indices = request.POST.getlist("selected")
+        
+        def print_tags(ref_tag, part_name):
+            # URL สำหรับล็อกอิน
+            login_url = "http://192.168.20.16:8080/jasperserver/rest_v2/login?j_username=jasperadmin&j_password=jasperadmin"
+            login_response = requests.get(login_url)
 
+            if login_response.status_code == 200:
+                cookies = login_response.cookies
+
+                # URL ของรายงาน
+                report_url = f"http://192.168.20.16:8080/jasperserver/rest_v2/reports/ac_report/print_tag_acc.pdf?ParmID={ref_tag}"
+                report_response = requests.get(report_url, cookies=cookies)
+
+                if report_response.status_code == 200:
+                    file_name = f"report_{part_name}"
+                    response = HttpResponse(
+                        report_response.content, content_type="application/pdf"
+                    )
+                    response["Content-Disposition"] = (
+                        f'attachment; filename="{file_name}.pdf"'
+                    )
+                    return response
+                else:
+                    return HttpResponse(
+                        "Failed to retrieve the report",
+                        status=report_response.status_code,
+                    )
+            else:
+                return HttpResponse(
+                    "Login to JasperServer failed", status=login_response.status_code
+                )
+        
         # ตรวจสอบปุ่มที่ถูกกด
         if "print_tag_qty" in request.POST:
             ref_tag = RefTag.objects.create()
@@ -90,5 +125,45 @@ def save_selected(request):
                     qr_code=qr_code,
                     ref_tag=ref_tag,
                 )
-                
-            return redirect("/")
+            return print_tags(ref_tag, part_name)
+        
+        if "print_tag_no_qty" in request.POST:
+            ref_tag = RefTag.objects.create()
+
+            for index in selected_indices:
+                # seq = 0
+                # for r in request.POST:
+                #     print(f"{seq} ==> {r}")
+                #     seq += 1
+
+                index = int(index)
+                part_no = request.POST.get(f"part_no_{index}")
+                part_code = request.POST.get(f"part_code_{index}")
+                part_name = request.POST.get(f"part_name_{index}")
+                model_name = request.POST.get(f"model_name_{index}")
+                date = request.POST.get(f"date_{index}")
+                whouse_code = request.POST.get(f"whouse_code_{index}")
+                qr_code = f"{part_no}"
+
+                Tag.objects.create(
+                    part_no=part_no,
+                    part_code=part_code,
+                    part_name=part_name,
+                    model_name=model_name,
+                    date=date,
+                    whouse_code=whouse_code,
+                    qr_code=qr_code,
+                    ref_tag=ref_tag,
+                )
+            return print_tags(ref_tag, part_name)
+        
+        if "print_tag_blank" in request.POST:
+            ref_tag = RefTag.objects.create()
+
+            for i in range(0, 6):
+                Tag.objects.create(
+                    ref_tag=ref_tag,
+                )
+            return print_tags(ref_tag, "")
+        
+        return redirect("/")

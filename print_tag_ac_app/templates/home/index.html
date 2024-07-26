@@ -49,9 +49,9 @@
       </div>
     </form>
     <form method="post" action="/save_selected">
-      <button type="submit" class="btn btn-success mt-3" name="print_tag_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag Qty</button>
-      <button type="submit" class="btn btn-success mt-3" name="print_tag_no_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag no Qty</button>
-      <button type="submit" class="btn btn-success mt-3" name="print_tag_blank"><i class="bi bi-printer-fill me-2"></i>Print tag Blank</button>
+      <button type="submit" class="btn btn-danger mt-3" name="print_tag_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag Qty</button>
+      <button type="submit" class="btn btn-success mt-3" name="print_tag_no_qty" id="printTagNoBtn"><i class="bi bi-printer-fill me-2"></i>Print tag no Qty</button>
+      <button type="submit" class="btn btn-light border border-black mt-3" name="print_tag_blank" id="printTagBlank"><i class="bi bi-printer-fill me-2"></i>Print tag Blank</button>
       <div class="table-responsive card shadow-sm mt-3 p-3">
         <table class="table table-borderless table-striped">
           <thead>
@@ -138,7 +138,7 @@
         $('#loadingSpinner').show(); // Show the spinner
       });
 
-      $('#printTagBtn').on('click', function (event) {
+      function validateSelection(event) {
         var isValid = true;
         var isAnySelected = false;
         $('input[name="selected"]:checked').each(function () {
@@ -155,8 +155,10 @@
         if (!isValid) {
           event.preventDefault();
         }
-      });
-
+      }
+    
+      $('#printTagBtn').on('click', validateSelection);
+      $('#printTagNoBtn').on('click', validateSelection);
     })
   </script>
 {% endblock %}
