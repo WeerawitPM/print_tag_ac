@@ -12,12 +12,12 @@
         <div class="row">
           <div class="col">
             <label for="date" class="form-label">Date</label>
-            <input type="date" class="form-control" id="date" name="date" value="{{ date }}" />
+            <input type="date" class="form-control" id="date" name="date" value="{{ date }}" required/>
           </div>
           <div class="col">
             <label for="whouse" class="form-label">Whouse Select</label>
-            <select class="form-select" aria-label="Default select example" id="whouse" name="whouse">
-              <option>Open this select menu</option>
+            <select class="form-select" aria-label="Default select example" id="whouse" name="whouse" required>
+              <option value="" disabled selected>Open this select menu</option>
               {% for whouse in whouse_data %}
                 <option value="{{ whouse.0 }}" {% if whouse.0 == selected_whouse %}selected{% endif %}>{{ whouse.1 }}</option>
               {% endfor %}
@@ -33,8 +33,8 @@
           </div>
           <div class="col">
             <label for="module_part" class="form-label">Module Part</label>
-            <select class="form-select" aria-label="Default select example" id="module_part" name="module_part">
-              <option>Open this select menu</option>
+            <select class="form-select" aria-label="Default select example" id="module_part" name="module_part" required>
+              <option value="" disabled selected>Open this select menu</option>
               {% for module_part in module_part_data %}
                 <option value="{{ module_part.0 }}" {% if module_part.0 == selected_module_part %}selected{% endif %}>{{ module_part.1 }}</option>
               {% endfor %}
@@ -43,13 +43,15 @@
         </div>
         <div class="row">
           <div class="col">
-            <button type="submit" class="btn btn-success mt-3" name="print_tag" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Search</button>
+            <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-search me-2"></i>Search</button>
           </div>
         </div>
       </div>
     </form>
     <form method="post" action="/save_selected">
-      <button type="submit" class="btn btn-success mt-3" name="print_tag" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag</button>
+      <button type="submit" class="btn btn-success mt-3" name="print_tag_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag Qty</button>
+      <button type="submit" class="btn btn-success mt-3" name="print_tag_no_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag no Qty</button>
+      <button type="submit" class="btn btn-success mt-3" name="print_tag_blank"><i class="bi bi-printer-fill me-2"></i>Print tag Blank</button>
       <div class="table-responsive card shadow-sm mt-3 p-3">
         <table class="table table-borderless table-striped">
           <thead>
@@ -87,13 +89,13 @@
                   <input type="hidden" name="model_name_{{ forloop.counter }}" value="{{ row.4 }}" />{{ row.4 }}
                 </td>
                 <td>
-                  <input type="hidden" name="stock_qty_{{ forloop.counter }}" value="{{ row.5 }}" />{{ row.5 }}
+                  <input type="hidden" name="stock_inout_{{ forloop.counter }}" value="{{ row.5 }}" />{{ row.5 }}
                 </td>
                 <td>
                   <input type="hidden" name="date_{{ forloop.counter }}" value="{{ row.6 }}" />{{ row.6 }}
                 </td>
                 <td>
-                  <input type="hidden" name="whouse_{{ forloop.counter }}" value="{{ row.7 }}" />{{ row.7 }}
+                  <input type="hidden" name="whouse_code_{{ forloop.counter }}" value="{{ row.7 }}" />{{ row.7 }}
                 </td>
               </tr>
             {% endfor %}
@@ -103,6 +105,19 @@
     </form>
   </div>
 
+  <!-- Spinner -->
+  <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none; position: fixed; top: 50%; left: 50%;">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+
+    <!-- Toast message HTML for no selection -->
+  <div class="toast align-items-center text-bg-warning border-0" id="selectionToast" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 1rem; right: 1rem;">
+    <div class="d-flex">
+      <div class="toast-body fs-6">กรุณาเลือกข้อมูลที่ต้องการ Print</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+
   <!-- Include jQuery and jQuery UI -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
@@ -110,12 +125,38 @@
 
   <script>
     $(document).ready(function () {
+
       $('#part_no').on('keyup', function () {
         var value = $(this).val().toLowerCase()
         $('.data-row').filter(function () {
           $(this).toggle($(this).find('input[name^="part_no_"]').val().toLowerCase().indexOf(value) > -1)
         })
       })
+
+      // Show spinner on form submit (Search button)
+      $('form').first().on('submit', function (event) {
+        $('#loadingSpinner').show(); // Show the spinner
+      });
+
+      $('#printTagBtn').on('click', function (event) {
+        var isValid = true;
+        var isAnySelected = false;
+        $('input[name="selected"]:checked').each(function () {
+          isAnySelected = true;
+          // other validation code if needed
+        });
+    
+        if (!isAnySelected) {
+          isValid = false;
+          var selectionToast = new bootstrap.Toast(document.getElementById('selectionToast'));
+          selectionToast.show();
+        }
+    
+        if (!isValid) {
+          event.preventDefault();
+        }
+      });
+
     })
   </script>
 {% endblock %}
