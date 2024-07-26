@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  <title>ปริ้น tag</title>
+{% endblock %}
+
+{% block content %}
+  <div class="row gap-3">
+    <form method="post" action="">
+      {% csrf_token %}
+      <div class="card shadow-sm p-4">
+        <div class="row">
+          <div class="col">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ date }}" />
+          </div>
+          <div class="col">
+            <label for="whouse" class="form-label">Whouse Select</label>
+            <select class="form-select" aria-label="Default select example" id="whouse" name="whouse">
+              <option>Open this select menu</option>
+              {% for whouse in whouse_data %}
+                <option value="{{ whouse.0 }}" {% if whouse.0 == selected_whouse %}selected{% endif %}>{{ whouse.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label for="part_no" class="form-label">Part No.</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="part_no" name="part_no" value="{{ part_no }}" />
+            </div>
+          </div>
+          <div class="col">
+            <label for="module_part" class="form-label">Module Part</label>
+            <select class="form-select" aria-label="Default select example" id="module_part" name="module_part">
+              <option>Open this select menu</option>
+              {% for module_part in module_part_data %}
+                <option value="{{ module_part.0 }}" {% if module_part.0 == selected_module_part %}selected{% endif %}>{{ module_part.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button type="submit" class="btn btn-success mt-3" name="print_tag" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Search</button>
+          </div>
+        </div>
+      </div>
+    </form>
+    <form method="post" action="/save_selected">
+      <button type="submit" class="btn btn-success mt-3" name="print_tag" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag</button>
+      <div class="table-responsive card shadow-sm mt-3 p-3">
+        <table class="table table-borderless table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">No.</th>
+              <th scope="col">Part No.</th>
+              <th scope="col">Part Code</th>
+              <th scope="col">Part Name</th>
+              <th scope="col">Model Name</th>
+              <th scope="col">Stock Qty</th>
+              <th scope="col">Date</th>
+              <th scope="col">Whouse</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+              <tr class="data-row">
+                <td>
+                  <input type="checkbox" name="selected" value="{{ forloop.counter }}" class="form-check-input" />
+                </td>
+                <td>
+                  <input type="hidden" name="no_{{ forloop.counter }}" value="{{ row.0 }}" />{{ row.0 }}
+                </td>
+                <td>
+                  <input type="hidden" name="part_no_{{ forloop.counter }}" value="{{ row.1 }}" />{{ row.1 }}
+                </td>
+                <td>
+                  <input type="hidden" name="part_code_{{ forloop.counter }}" value="{{ row.2 }}" />{{ row.2 }}
+                </td>
+                <td>
+                  <input type="hidden" name="part_name_{{ forloop.counter }}" value="{{ row.3 }}" />{{ row.3 }}
+                </td>
+                <td>
+                  <input type="hidden" name="model_name_{{ forloop.counter }}" value="{{ row.4 }}" />{{ row.4 }}
+                </td>
+                <td>
+                  <input type="hidden" name="stock_qty_{{ forloop.counter }}" value="{{ row.5 }}" />{{ row.5 }}
+                </td>
+                <td>
+                  <input type="hidden" name="date_{{ forloop.counter }}" value="{{ row.6 }}" />{{ row.6 }}
+                </td>
+                <td>
+                  <input type="hidden" name="whouse_{{ forloop.counter }}" value="{{ row.7 }}" />{{ row.7 }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+
+  <!-- Include jQuery and jQuery UI -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+
+  <script>
+    $(document).ready(function () {
+      $('#part_no').on('keyup', function () {
+        var value = $(this).val().toLowerCase()
+        $('.data-row').filter(function () {
+          $(this).toggle($(this).find('input[name^="part_no_"]').val().toLowerCase().indexOf(value) > -1)
+        })
+      })
+    })
+  </script>
+{% endblock %}

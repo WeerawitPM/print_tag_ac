@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-ge$s82^n8n#a!uv+xp#-4ial%%czpxr3(&a*i_-cv4t!&d3m6!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "print_tag_ac_app",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,31 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
+    "formula_vcst": {
+        "ENGINE": "mssql",
+        "NAME": "formula",
+        "USER": "fm1234",
+        "PASSWORD": "x2y2",
+        "HOST": "192.168.20.9",
+        "PORT": "1433",
+        "Trusted_Connection": "no",
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+        },
+    },
+    "itc_inwhouse": {
+        "ENGINE": "mssql",
+        "NAME": "itc_inwhouse",
+        "USER": "fm1234",
+        "PASSWORD": "x2y2",
+        "HOST": "192.168.20.9",
+        "PORT": "1433",
+        "Trusted_Connection": "no",
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+        },
+    },
 }
 
 
