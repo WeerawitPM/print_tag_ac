@@ -61,6 +61,7 @@
       <button type="submit" class="btn btn-danger mt-3" name="print_tag_qty" id="printTagBtn"><i class="bi bi-printer-fill me-2"></i>Print tag Qty</button>
       <button type="submit" class="btn btn-success mt-3" name="print_tag_no_qty" id="printTagNoBtn"><i class="bi bi-printer-fill me-2"></i>Print tag no Qty</button>
       <button type="submit" class="btn btn-light border border-black mt-3" name="print_tag_blank" id="printTagBlank"><i class="bi bi-printer-fill me-2"></i>Print tag Blank</button>
+      <button type="submit" class="btn btn-outline-success mt-3" name="export_to_excel" id="exportExcelBtn"><i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>Export to Excel</button>
       <div class="table-responsive card shadow-sm mt-3 p-3">
         <table class="table table-borderless table-striped">
           <thead>
@@ -172,6 +173,7 @@
     
       $('#printTagBtn').on('click', validateSelection);
       $('#printTagNoBtn').on('click', validateSelection);
+      $('#exportExcelBtn').on('click', validateSelection);
 
       // Select/Deselect all checkboxes that are visible
       $('#selectAll').on('click', function () {

@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 import requests
 from decimal import Decimal
+import pandas as pd
 
 
 # Create your views here.
@@ -203,5 +204,58 @@ def save_selected(request):
                     ref_tag=ref_tag,
                 )
             return print_tags(ref_tag, "")
+
+        if "export_to_excel" in request.POST:
+            # สร้าง DataFrame หรือ openpyxl Workbook
+            data = []
+
+            for index in selected_indices:
+                index = int(index)
+                part_no = request.POST.get(f"part_no_{index}")
+                part_code = request.POST.get(f"part_code_{index}")
+                part_name = request.POST.get(f"part_name_{index}")
+                model_name = request.POST.get(f"model_name_{index}")
+                stock_inout = request.POST.get(f"stock_inout_{index}")
+                date = request.POST.get(f"date_{index}")
+                whouse_code = request.POST.get(f"whouse_code_{index}")
+
+                data.append(
+                    [
+                        part_no,
+                        part_code,
+                        part_name,
+                        model_name,
+                        stock_inout,
+                        date,
+                        whouse_code,
+                    ]
+                )
+
+            # ใช้ pandas
+            df = pd.DataFrame(
+                data,
+                columns=[
+                    "Part No",
+                    "Part Code",
+                    "Part Name",
+                    "Model Name",
+                    "Stock In/Out",
+                    "Date",
+                    "Warehouse Code",
+                ],
+            )
+
+            # สร้าง response สำหรับ Excel
+            response = HttpResponse(
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            response["Content-Disposition"] = (
+                'attachment; filename="selected_data.xlsx"'
+            )
+
+            # เขียนข้อมูลลงใน Excel
+            df.to_excel(response, index=False)
+
+            return response
 
         return redirect("/")
