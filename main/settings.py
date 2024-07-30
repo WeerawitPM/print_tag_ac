@@ -154,3 +154,4 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # ค่าใหญ่เพื่อให้เกือบไม่มีข้อจำกัด
