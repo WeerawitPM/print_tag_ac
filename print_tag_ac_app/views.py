@@ -42,16 +42,20 @@ def index(request):
 
         if new_search_key not in existing_search_keys:
             # Call stored procedure only if new search criteria is not in session data
-            with connections["itc_inwhouse"].cursor() as cursor:
-                query = """
-                    EXEC Store_PrintTag_AC %s, %s, %s
-                """
-                cursor.execute(query, [whouse, module_part, date])
-                new_data = cursor.fetchall()
-                new_data = convert_decimal_to_float(
-                    new_data
-                )  # Convert Decimal to float
-                data.extend(new_data)  # Append new data to existing data
+            try:
+                with connections["itc_inwhouse"].cursor() as cursor:
+                    query = """
+                        EXEC Store_PrintTag_AC %s, %s, %s
+                    """
+                    cursor.execute(query, [whouse, module_part, date])
+                    new_data = cursor.fetchall()
+                    new_data = convert_decimal_to_float(
+                        new_data
+                    )  # Convert Decimal to float
+                    data.extend(new_data)  # Append new data to existing data
+                    context.update({"message": "ค้นหาข้อมูลสำเร็จ"})
+            except Exception as e:
+                context.update({"message": str(e)})
 
             # Add new search key to the session
             existing_search_keys.append(new_search_key)

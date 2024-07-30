@@ -5,6 +5,15 @@
 {% endblock %}
 
 {% block content %}
+  {% if message %}
+    <script>
+      Swal.fire({
+        title: "Success!",
+        text: "{{message}}",
+        icon: "success"
+      });
+    </script>
+  {% endif %}
   <div class="row gap-3">
     <form method="post" action="">
       {% csrf_token %}
@@ -16,7 +25,7 @@
           </div>
           <div class="col">
             <label for="whouse" class="form-label">Whouse Select</label>
-            <select class="form-select" aria-label="Default select example" id="whouse" name="whouse" required>
+            <select class="form-select select2" aria-label="Default select example" id="whouse" name="whouse" required>
               <option value="" disabled selected>Open this select menu</option>
               {% for whouse in whouse_data %}
                 <option value="{{ whouse.0 }}" {% if whouse.0 == selected_whouse %}selected{% endif %}>{{ whouse.1 }}</option>
@@ -33,7 +42,7 @@
           </div>
           <div class="col">
             <label for="module_part" class="form-label">Module Part</label>
-            <select class="form-select" aria-label="Default select example" id="module_part" name="module_part" required>
+            <select class="form-select select2" aria-label="Default select example" id="module_part" name="module_part" required>
               <option value="" disabled selected>Open this select menu</option>
               {% for module_part in module_part_data %}
                 <option value="{{ module_part.0 }}" {% if module_part.0 == selected_module_part %}selected{% endif %}>{{ module_part.1 }}</option>
@@ -110,7 +119,7 @@
     <span class="visually-hidden">Loading...</span>
   </div>
 
-    <!-- Toast message HTML for no selection -->
+  <!-- Toast message HTML for no selection -->
   <div class="toast align-items-center text-bg-warning border-0" id="selectionToast" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 1rem; right: 1rem;">
     <div class="d-flex">
       <div class="toast-body fs-6">กรุณาเลือกข้อมูลที่ต้องการ Print</div>
@@ -122,6 +131,10 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+  <!-- Include Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Include Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <script>
     $(document).ready(function () {
@@ -165,6 +178,12 @@
         var isChecked = $(this).is(':checked');
         $('.data-row:visible input[name="selected"]').prop('checked', isChecked);
       });
+
+      $('.select2').select2({
+        placeholder: "Open this select menu",  // แสดงข้อความ Placeholder
+        allowClear: true                      // เพิ่มปุ่มล้างข้อมูล
+      });
+
     })
   </script>
 {% endblock %}
