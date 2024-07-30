@@ -18,11 +18,12 @@ def convert_decimal_to_float(data):
 def index(request):
     data = []
     context = {}
-    
+
     # Clear session data when the page is refreshed
     if request.method == "GET":
-        request.session.pop('data', None)
-        
+        request.session.pop("data", None)
+        request.session.pop("search_keys", None)
+
     # Load session data if exists
     if "data" in request.session:
         data = request.session["data"]
@@ -33,15 +34,30 @@ def index(request):
         part_no = request.POST.get("part_no")
         module_part = request.POST.get("module_part")
 
-        # เรียก stored procedure
-        with connections["itc_inwhouse"].cursor() as cursor:
-            query = """
-                EXEC Store_PrintTag_AC %s, %s, %s
-            """
-            cursor.execute(query, [whouse, module_part, date])
-            new_data = cursor.fetchall()
-            new_data = convert_decimal_to_float(new_data)  # Convert Decimal to float
-            data.extend(new_data)  # Append new data to existing data
+        # Define a unique search key for the new data set
+        new_search_key = f"{whouse}_{module_part}_{date}"
+
+        # Check if the search criteria already exists
+        existing_search_keys = request.session.get("search_keys", [])
+
+        if new_search_key not in existing_search_keys:
+            # Call stored procedure only if new search criteria is not in session data
+            with connections["itc_inwhouse"].cursor() as cursor:
+                query = """
+                    EXEC Store_PrintTag_AC %s, %s, %s
+                """
+                cursor.execute(query, [whouse, module_part, date])
+                new_data = cursor.fetchall()
+                new_data = convert_decimal_to_float(
+                    new_data
+                )  # Convert Decimal to float
+                data.extend(new_data)  # Append new data to existing data
+
+            # Add new search key to the session
+            existing_search_keys.append(new_search_key)
+            request.session["search_keys"] = existing_search_keys
+            # Update session data
+            request.session["data"] = data
 
         context.update(
             {
@@ -49,11 +65,9 @@ def index(request):
                 "selected_whouse": whouse,
                 "part_no": part_no,
                 "selected_module_part": module_part,
+                "data": data,  # Pass data to template
             }
         )
-
-    # Save updated data to session
-    request.session["data"] = data
 
     with connections["formula_vcst"].cursor() as cursor:
         whouse_query = """
@@ -72,7 +86,6 @@ def index(request):
         {
             "whouse_data": whouse_data,
             "module_part_data": module_part_data,
-            "data": data,  # Pass data to template
         }
     )
 
